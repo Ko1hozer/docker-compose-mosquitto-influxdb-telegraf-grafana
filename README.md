@@ -1,78 +1,61 @@
-# Easy IoT data infrastructure setup via docker
+Установка инфраструктуры данных IoT через Docker
 
-Based on https://github.com/iothon/docker-compose-mqtt-influxdb-grafana and https://lucassardois.medium.com/handling-iot-data-with-mqtt-telegraf-influxdb-and-grafana-5a431480217
+Основано на https://github.com/iothon/docker-compose-mqtt-influxdb-grafana и https://lucassardois.medium.com/handling-iot-data-with-mqtt-telegraf-influxdb-and-grafana-5a431480217.
 
-This docker compose installs and sets up:
-- [Eclipse Mosquitto](https://mosquitto.org) - An open source MQTT broker to collect your data via MQTT protocol
-- [InfluxDB](https://www.influxdata.com/) - The Time Series Data Platform to store your data in time series database 
-- [Telegraf](https://www.influxdata.com/time-series-platform/telegraf/) - The open source server agent to connect Mosquitto and InfluxDB together
-- [Grafana](https://grafana.com/) - The open observability platform to draw some graphs and more
+Этот docker-compose устанавливает и настраивает:
+- [Eclipse Mosquitto] (https://mosquitto.org) - открытый MQTT-брокер для сбора данных через протокол MQTT
+- [InfluxDB] (https://www.influxdata.com/) - платформа для хранения данных по времени для хранения в базе данных временных рядов
+- [Telegraf] (https://www.influxdata.com/time-series-platform/telegraf/) - серверный агент с открытым исходным кодом для подключения Mosquitto и InfluxDB друг к другу
+- [Grafana] (https://grafana.com/) - открытая платформа для обеспечения наблюдаемости для создания графиков и других вещей.
 
-# Setup process
-## Install docker
+# Процесс установки
+## Установите Docker
 
-```
 sudo apt install docker.io
-sudo apt install docker-compose 
-```
+sudo apt установить docker-compose
 
-```
 sudo usermod -aG docker iothon
-```
 
-## Clone this repository
+## Клонируйте этот репозиторий
 
-```
 git clone https://github.com/Ko1hozer/docker-compose-mosquitto-telegraf-influxdb-grafana.git
-```
 
-## Run it
+## Запустите это
 
-To download, setup and start all the services run
-```
-cd docker-compose-mosquitto-influxdb-telegraf-grafana
+Чтобы загрузить, настроить и запустить все службы, выполните
+cd docker-compose-mosquitto-telegraf-influxdb-grafana
 sudo docker-compose up -d
-```
 
-To check the running setvices run
-```
+Чтобы проверить работающие службы, запустите
 sudo docker ps
-```
 
-To shutdown the whole thing run
-```
+Чтобы выключить все, запустите
 sudo docker-compose down
-```
 
-## Test your setup
+## Протестируйте вашу настройку
 
-Post some messages into your Mosquitto so you'll be able to see some data in Grafana already: 
-```
+Опубликуйте несколько сообщений в вашем Mosquitto, чтобы вы уже могли увидеть некоторые данные в Grafana: 
 sudo docker container exec mosquitto mosquitto_pub -t 'sensor/' -m '{"humidity":21, "temperature":21, "battery_voltage_mv":3000}'
-```
 
 ### Grafana
-Open in your browser: 
-`http://<your-server-ip>:3000`
+Откройте в вашем браузере: 
+http://<your-server-ip>:3000
 
-Username and pasword are admin:admin. You should see a graph of the data you have entered with the `mosquitto_pub` command.
+Имя пользователя и пароль - admin:admin. Вы должны увидеть график данных, которые вы вводили с помощью команды mosquitto_pub.
 
 ### InfluxDB
-You can poke around your InfluxDB setup here:
-`http://<your-server-ip>:8086`
-Username and password are user:password1234
+Вы можете проверить свою настройку InfluxDB здесь:
+http://<your-server-ip>:8086
+Имя пользователя и пароль - user:password1234
 
-# Configuration 
-### Mosquitto 
-Mosquitto is configured to allow anonymous connections and posting of messages
-```
+# Конфигурация
+### Mosquitto
+Mosquitto настроен на разрешение анонимных подключений и размещения сообщений
 listener 1883
 allow_anonymous true
-```
 
-### InfluxDB 
-The configuration is fully in `docker-compose.yml`. Note the `DOCKER_INFLUXDB_INIT_ADMIN_TOKEN` - you can run a test with the one given, but you better re-generate it for your own security. This same token is repeated in several other config files, you have to update it there also. I did not find an easy way to generate it automagically in docker yet. **Change it before you go live**. You have been warned. Also change the username and password.
-```
+### InfluxDB
+Конфигурация полностью находится в docker-compose.yml. Обратите внимание на DOCKER_INFLUXDB_INIT_ADMIN_TOKEN - вы можете запустить тест с указанным токеном, но вам лучше перегенерировать его для вашей собственной безопасности. Этот же токен повторяется в нескольких других файлах конфигурации, вы должны обновить его там также. Я не нашел легкого способа автоматически его генерировать в docker. Измените его, прежде чем вы это сделаете. Вы были предупреждены. Также измените имя пользователя и пароль.
   influxdb:
     image: influxdb
     container_name: influxdb
@@ -92,11 +75,8 @@ The configuration is fully in `docker-compose.yml`. Note the `DOCKER_INFLUXDB_IN
       - DOCKER_INFLUXDB_INIT_BUCKET=some_data
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=4eYvsu8wZCJ6tKuE2sxvFHkvYFwSMVK0011hEEiojvejzpSaij86vYQomN_12au6eK-2MZ6Knr-Sax201y70w==
 
-```
-
-### Telegraf 
-Telegraf is responsible for piping mqtt messages to influxdb. It is set up to listen for topic `sensor/`. You can alter this configuration according to your needs, check the official documentation on how to do that. Note the InfluxDB token you have to update.
-```
+### Telegraf
+Telegraf отвечает за передачу mqtt-сообщений в influxdb. Он настроен на прослушивание темы sensor/. Вы можете изменять эту конфигурацию по своему усмотрению, проверьте официальную документацию о том, как это сделать. Обратите внимание на токен InfluxDB, который вы должны обновить.
 [[inputs.mqtt_consumer]]
   servers = ["tcp://mosquitto:1883"]
   topics = [
@@ -109,12 +89,9 @@ Telegraf is responsible for piping mqtt messages to influxdb. It is set up to li
   token = "4eYvsu8wZCJ6tKuE2sxvFHkvYFwSMVK0011hEEiojvejzpSaij86vYQomN_12au6eK-2MZ6Knr-Sax201y70w=="
   organization = "some_org"
   bucket = "some_data"
-
-```
-
-### Grafana data source 
-Grafana is provisioned with a default data source pointing to the InfluxDB instance installed in this same compose. The configuration file is `grafana-provisioning/datasources/automatic.yml`. Note the InfluxDB token you have to update. 
-```
+  
+  ### Источник данных Grafana
+Начально в Grafana установлен источник данных по умолчанию, указывающий на установленный в этом же compose экземпляр InfluxDB. Файл конфигурации находится в grafana-provisioning/datasources/automatic.yml. Обратите внимание на токен InfluxDB, который вы должны обновить.
 apiVersion: 1
 
 datasources:
@@ -129,8 +106,6 @@ datasources:
       tlsSkipVerify: true
     secureJsonData:
       token: 4eYvsu8wZCJ6tKuE2sxvFHkvYFwSMVK0011hEEiojvejzpSaij86vYQomN_12au6eK-2MZ6Knr-Sax201y70w==
-```
 
-### Grafana dashboard
-Default Grafana dashboard is also set up in this directory: `grafana-provisioning/dashboards`
-
+### Grafana мониторинг
+Для настройки наблюдения Grafana находится каталог grafana-provisioning/dashboards.
