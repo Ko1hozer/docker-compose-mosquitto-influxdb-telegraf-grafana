@@ -23,7 +23,7 @@ sudo usermod -aG docker iothon
 ## Clone this repository
 
 ```
-git clone git@github.com:Miceuz/docker-compose-mosquitto-influxdb-telegraf-grafana.git 
+git clone https://github.com/Ko1hozer/docker-compose-mosquitto-telegraf-influxdb-grafana.git
 ```
 
 ## Run it
@@ -31,7 +31,7 @@ git clone git@github.com:Miceuz/docker-compose-mosquitto-influxdb-telegraf-grafa
 To download, setup and start all the services run
 ```
 cd docker-compose-mosquitto-influxdb-telegraf-grafana
-sudo docker-compose up -d`
+sudo docker-compose up -d
 ```
 
 To check the running setvices run
@@ -48,7 +48,7 @@ sudo docker-compose down
 
 Post some messages into your Mosquitto so you'll be able to see some data in Grafana already: 
 ```
-sudo docker container exec mosquitto mosquitto_pub -t 'paper_wifi/test/' -m '{"humidity":21, "temperature":21, "battery_voltage_mv":3000}'
+sudo docker container exec mosquitto mosquitto_pub -t 'sensor/' -m '{"humidity":21, "temperature":21, "battery_voltage_mv":3000}'
 ```
 
 ### Grafana
@@ -95,12 +95,12 @@ The configuration is fully in `docker-compose.yml`. Note the `DOCKER_INFLUXDB_IN
 ```
 
 ### Telegraf 
-Telegraf is responsible for piping mqtt messages to influxdb. It is set up to listen for topic `paper_wifi/test`. You can alter this configuration according to your needs, check the official documentation on how to do that. Note the InfluxDB token you have to update.
+Telegraf is responsible for piping mqtt messages to influxdb. It is set up to listen for topic `sensor/`. You can alter this configuration according to your needs, check the official documentation on how to do that. Note the InfluxDB token you have to update.
 ```
 [[inputs.mqtt_consumer]]
   servers = ["tcp://mosquitto:1883"]
   topics = [
-    "paper_wifi/test/#"
+    "sensor/#"
   ]
   data_format = "json"
 
